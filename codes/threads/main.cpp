@@ -1,9 +1,8 @@
-#include <iostream>
 #include <thread>
 #include <vector>
 #include <random>
-#include <string>
-#include <mutex>
+#include <algorithm>
+#include <print>
 
 class RandomSum {
 private:
@@ -24,18 +23,14 @@ public:
             total += dis(gen);
         }
 
-        std::lock_guard<std::mutex> lock(mtx);
-        std::cout << "Thread " << id << " sum: " << total << std::endl;
+        std::println("Thread {} sum: {}", id, total);
     }
 
     int getTotal() { return total; }
 
     int getId() { return id; }
-
-    static std::mutex mtx;
 };
 
-std::mutex RandomSum::mtx;
 
 int main() {
     std::vector<std::thread> threads;
@@ -52,17 +47,11 @@ int main() {
     }
 
     // Thread with the highest total
-    int bestId = sums[0]->getId();
-    int bestTotal = sums[0]->getTotal();
+    std::sort(sums.begin(), sums.end(), [](const auto& a, const auto& b) {
+        return a->getTotal() > b->getTotal();
+    });
 
-    for (const auto& sum : sums) {
-        if (sum->getTotal() > bestTotal) {
-            bestTotal = sum->getTotal();
-            bestId = sum->getId();
-        }
-    }
-
-    std::cout << "Highest total: Thread " << bestId << " total sum " << bestTotal << std::endl;
+    std::println("Highest total: Thread {} sum: {}", sums[0]->getId(), sums[0]->getTotal());
 
     return 0;
 }
